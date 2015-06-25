@@ -128,6 +128,25 @@ module Kitchen
       perform("diagnose", "diagnose", args, :loader => @loader)
     end
 
+    desc "destroy [INSTANCE|REGEXP|all]", 
+      "Change instance state to destroy. Delete all information for one or more instances"
+    long_desc <<-DESC
+      The instance states are in order: destroy, create, converge, setup, verify, destroy.
+      Change one or more instances from the current state to the destroy state. Actions for all
+      intermediate states will be executed. See http://kitchen.ci for further explanation.
+    DESC
+    method_option :sanitize,
+      :aliases => "-s",
+      :type => :boolean,
+      :desc => <<-DESC.gsub(/^\s+/, "").gsub(/\n/, " ")
+        Destroy all instances in .kitchen folder (including those no longer in .kitchen.yml file)
+      DESC
+    log_options
+    define_method("destroy") do |*args|
+      update_config!
+      perform("destroy", "action", args)
+    end
+
     {
       :create   => "Change instance state to create. " \
                    "Start one or more instances",
@@ -138,8 +157,6 @@ module Kitchen
                    "Install busser and related gems on one or more instances",
       :verify   => "Change instance state to verify. " \
                    "Run automated tests on one or more instances",
-      :destroy  => "Change instance state to destroy. " \
-                   "Delete all information for one or more instances"
     }.each do |action, short_desc|
       desc(
         "#{action} [INSTANCE|REGEXP|all]",
